@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: dashboards
+  namespace: opencrvs
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+  selector:
+    app: dashboards
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dashboards
+  namespace: opencrvs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dashboards
+  template:
+    metadata:
+      labels:
+        app: dashboards
+    spec:
+      containers:
+      - name: dashboards
+        image: ghcr.io/opencrvs/ocrvs-dashboards:${VERSION}
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"

@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: documents
+  namespace: opencrvs
+spec:
+  ports:
+  - port: 9050
+    targetPort: 9050
+  selector:
+    app: documents
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: documents
+  namespace: opencrvs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: documents
+  template:
+    metadata:
+      labels:
+        app: documents
+    spec:
+      containers:
+      - name: documents
+        image: ghcr.io/opencrvs/ocrvs-documents:${VERSION}
+        ports:
+        - containerPort: 9050
+        env:
+        - name: NODE_ENV
+          value: "development"
+        - name: COUNTRY_CONFIG_URL
+          value: "http://countryconfig:3040"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"

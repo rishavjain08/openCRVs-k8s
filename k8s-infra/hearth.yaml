@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hearth
+  namespace: opencrvs
+spec:
+  ports:
+  - port: 3447
+    targetPort: 3447
+  selector:
+    app: hearth
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hearth
+  namespace: opencrvs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hearth
+  template:
+    metadata:
+      labels:
+        app: hearth
+    spec:
+      containers:
+      - name: hearth
+        image: opencrvs/hearth:1.1.0
+        ports:
+        - containerPort: 3447
+        env:
+        - name: mongodb__url
+          value: mongodb://mongo1/hearth-dev
+        - name: logger__level
+          value: warn
+        - name: authentication__type
+          value: disabled
+        - name: idGenerator
+          value: uuidv4
+        - name: server__fhirVersion
+          value: stu3
+        volumeMounts:
+        - name: public-key
+          mountPath: /secrets/public-key.pem
+          subPath: public-key.pem
+        - name: hearth-plugins
+          mountPath: /src/hearth/lib/plugins/checkDuplicateTask.js
+          subPath: checkDuplicateTask.js
+        - name: hearth-config
+          mountPath: /src/hearth/config/queryparam-extensions.json
+          subPath: queryparam-extensions.json
+      volumes:
+      - name: public-key
+        secret:
+          secretName: hearth-public-key
+      - name: hearth-plugins
+        configMap:
+          name: hearth-plugins
+      - name: hearth-config
+        configMap:
+          name: hearth-config

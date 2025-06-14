@@ -1,0 +1,91 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway
+  namespace: opencrvs
+spec:
+  type: NodePort
+  ports:
+  - port: 7070
+    targetPort: 7070
+    nodePort: 30070
+  selector:
+    app: gateway
+    
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway
+  namespace: opencrvs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gateway
+  template:
+    metadata:
+      labels:
+        app: gateway
+    spec:
+      volumes:
+      - name: public-key
+        secret:
+          secretName: opencrvs-public-key
+      containers:
+      - name: gateway
+        image: ghcr.io/opencrvs/ocrvs-gateway:${VERSION}
+        ports:
+        - containerPort: 7070
+        volumeMounts:
+        - name: public-key
+          mountPath: /secrets/public-key.pem
+          subPath: public-key.pem
+        env:
+        - name: HOST
+          value: "0.0.0.0"
+        - name: REDIS_HOST
+          value: "redis"
+        - name: CONFIG_SMS_CODE_EXPIRY_SECONDS
+          value: "600"
+        - name: CONFIG_TOKEN_EXPIRY_SECONDS
+          value: "604800"
+        - name: NODE_ENV
+          value: "development"
+        - name: EVENTS_URL
+          value: "http://events:5555/"
+        - name: FHIR_URL
+          value: "http://hearth:3447/fhir"
+        - name: USER_MANAGEMENT_URL
+          value: "http://user-mgnt:3030/"
+        - name: SEARCH_URL
+          value: "http://search:9090/"
+        - name: METRICS_URL
+          value: "http://metrics:1050"
+        - name: AUTH_URL
+          value: "http://auth:4040"
+        - name: COUNTRY_CONFIG_URL
+          value: "http://countryconfig:3040"
+        - name: NOTIFICATION_URL
+          value: "http://notification:2020/"
+        - name: WORKFLOW_URL
+          value: "http://workflow:5050/"
+        - name: APPLICATION_CONFIG_URL
+          value: "http://config:2021/"
+        - name: WEBHOOKS_URL
+          value: "http://webhooks:2525/"
+        - name: CHECK_INVALID_TOKEN
+          value: "true"
+        - name: MINIO_BUCKET
+          value: "ocrvs"
+        - name: DOCUMENTS_URL
+          value: "http://documents:9050"
+        - name: CERT_PUBLIC_KEY_PATH
+          value: "/secrets/public-key.pem"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"

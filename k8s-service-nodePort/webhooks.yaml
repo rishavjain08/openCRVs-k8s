@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: webhooks
+  namespace: opencrvs
+spec:
+  type: NodePort
+  ports:
+  - port: 2525
+    targetPort: 2525
+    nodePort: 30025
+  selector:
+    app: webhooks
+    
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webhooks
+  namespace: opencrvs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webhooks
+  template:
+    metadata:
+      labels:
+        app: webhooks
+    spec:
+      volumes:
+      - name: public-key
+        secret:
+          secretName: opencrvs-public-key
+      containers:
+      - name: webhooks
+        image: ghcr.io/opencrvs/ocrvs-webhooks:${VERSION}
+        ports:
+        - containerPort: 2525
+        volumeMounts:
+        - name: public-key
+          mountPath: /secrets/public-key.pem
+          subPath: public-key.pem
+        env:
+        - name: REDIS_HOST
+          value: "redis"
+        - name: MONGO_URL
+          value: "mongodb://mongo1/webhooks"
+        - name: AUTH_URL
+          value: "http://auth:4040"
+        - name: USER_MANAGEMENT_URL
+          value: "http://user-mgnt:3030/"
+        - name: HOST
+          value: "0.0.0.0"
+        - name: CHECK_INVALID_TOKEN
+          value: "true"
+        - name: FHIR_URL
+          value: "http://hearth:3447/fhir"
+        - name: CERT_PUBLIC_KEY_PATH
+          value: "/secrets/public-key.pem"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"

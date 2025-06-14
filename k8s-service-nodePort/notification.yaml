@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification
+  namespace: opencrvs
+spec:
+  type: NodePort
+  ports:
+  - port: 2020
+    targetPort: 2020
+    nodePort: 30022
+  selector:
+    app: notification
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification
+  namespace: opencrvs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification
+  template:
+    metadata:
+      labels:
+        app: notification
+    spec:
+      volumes:
+      - name: public-key
+        secret:
+          secretName: opencrvs-public-key
+      containers:
+      - name: notification
+        image: ghcr.io/opencrvs/ocrvs-notification:${VERSION}
+        ports:
+        - containerPort: 2020
+        volumeMounts:
+        - name: public-key
+          mountPath: /secrets/public-key.pem
+          subPath: public-key.pem
+        env:
+        - name: COUNTRY
+          value: "${COUNTRY:-bgd}"
+        - name: HOST
+          value: "0.0.0.0"
+        - name: COUNTRY_CONFIG_URL
+          value: "http://countryconfig:3040"
+        - name: USER_MANAGEMENT_URL
+          value: "http://user-mgnt:3030/"
+        - name: CERT_PUBLIC_KEY_PATH
+          value: "/secrets/public-key.pem"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"

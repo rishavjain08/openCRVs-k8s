@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: events
+  namespace: opencrvs
+spec:
+  ports:
+  - port: 5555
+    targetPort: 5555
+  selector:
+    app: events
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: events
+  namespace: opencrvs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: events
+  template:
+    metadata:
+      labels:
+        app: events
+    spec:
+      containers:
+      - name: events
+        image: ghcr.io/opencrvs/ocrvs-events:${VERSION}
+        ports:
+        - containerPort: 5555
+        env:
+        - name: EVENTS_MONGO_URL
+          value: "mongodb://mongo1/events"
+        - name: USER_MGNT_MONGO_URL
+          value: "mongodb://mongo1/user-mgnt"
+        - name: ES_URL
+          value: "http://elasticsearch:9200"
+        - name: COUNTRY_CONFIG_URL
+          value: "http://countryconfig:3040"
+        - name: DOCUMENTS_URL
+          value: "http://documents:9050"
+        - name: USER_MANAGEMENT_URL
+          value: "http://user-mgnt:3030"
+        - name: AUTH_URL
+          value: "http://auth:4040"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"

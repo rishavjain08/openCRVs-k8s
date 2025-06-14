@@ -1,0 +1,55 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: countryconfig
+  namespace: opencrvs
+spec:
+  type: NodePort
+  ports:
+    - port: 3040
+      targetPort: 3040
+      nodePort: 30040
+  selector:
+    app: countryconfig
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: countryconfig
+  namespace: opencrvs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: countryconfig
+  template:
+    metadata:
+      labels:
+        app: countryconfig
+    spec:
+      volumes:
+        - name: public-key
+          secret:
+            secretName: opencrvs-public-key
+      containers:
+        - name: countryconfig
+          image: opencrvs/ocrvs-farajaland:latest
+          ports:
+            - containerPort: 3040
+          env:
+            - name: MONGO_URL
+              value: "mongodb://mongodb:27017/user-mgnt"
+            - name: NODE_ENV
+              value: "development"
+            - name: FHIR_URL
+              value: "http://hearth:3447/fhir"
+            - name: AUTH_URL
+              value: "http://auth:4040"
+            - name: CHECK_INVALID_TOKEN
+              value: "true"
+            - name: CERT_PUBLIC_KEY_PATH
+              value: "/secrets/public-key.pem"
+          volumeMounts:
+            - name: public-key
+              mountPath: /secrets/public-key.pem
+              subPath: public-key.pem
