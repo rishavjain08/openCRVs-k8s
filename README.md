@@ -9,8 +9,8 @@ This project provides a Kubernetes-based deployment for OpenCRVS, with services 
   - Acts as a lightweight cert-manager for local and test environments.
 
 - **NodePort Exposure:**
-  - All microservices are exposed using Kubernetes NodePort, making them accessible from outside the cluster (e.g., your local machine or test network).
-  - This approach is based on the service exposure pattern in `docker-compose.dev.yaml` (if available), ensuring parity between Docker Compose and Kubernetes setups for development.
+  - Some microservices are exposed using Kubernetes NodePort, making them accessible from outside the cluster (e.g., your local machine or test network).
+  - This approach is based on the service exposure pattern in `docker-compose.dev.yaml`, ensuring parity between Docker Compose and Kubernetes setups for development.
 
 ## Deployment Overview
 
