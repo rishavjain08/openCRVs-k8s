@@ -4,6 +4,7 @@ metadata:
   name: influxdb
   namespace: opencrvs
 spec:
+  clusterIP: None
   ports:
   - port: 8086
     targetPort: 8086

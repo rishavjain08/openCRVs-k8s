@@ -4,6 +4,7 @@ metadata:
   name: minio
   namespace: opencrvs
 spec:
+  clusterIP: None
   ports:
   - name: api
     port: 3535

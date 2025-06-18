@@ -4,6 +4,7 @@ metadata:
   name: mongo1
   namespace: opencrvs
 spec:
+  clusterIP: None
   ports:
   - port: 27017
     targetPort: 27017

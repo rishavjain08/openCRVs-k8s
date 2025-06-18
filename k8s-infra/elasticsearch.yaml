@@ -4,6 +4,7 @@ metadata:
   name: elasticsearch
   namespace: opencrvs
 spec:
+  clusterIP: None
   ports:
   - name: rest
     port: 9200
@@ -13,6 +14,7 @@ spec:
     targetPort: 9300
   selector:
     app: elasticsearch
+    
 ---
 apiVersion: apps/v1
 kind: StatefulSet
