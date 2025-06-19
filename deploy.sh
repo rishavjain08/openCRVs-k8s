@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set the OpenCRVS version
-VERSION=${VERSION:-"phase-3"}
+VERSION=${VERSION:-"develop"}
 
 # Check if namespace exists, if not create it
 kubectl get namespace opencrvs || kubectl create namespace opencrvs
